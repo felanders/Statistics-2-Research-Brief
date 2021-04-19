@@ -1,0 +1,84 @@
+---
+title: 'Topic: Women’s political participation and health'
+author: "Andreas Felderer"
+output:
+  pdf_document: default
+  pdf: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+### Setup
+
+```{r, results='hide', message=FALSE}
+library(tidyverse) 
+library(gtsummary) # descriptive statistics
+library(modelsummary) # alternative to stargazer
+library(estimatr) # regressions with robust SE
+library(knitr) # data frames as latex tables
+
+df <- read.csv("political_participation.csv", header = T)
+```
+
+```{r}
+names(df)
+summary(df)
+```
+
+```{r}
+df %>% 
+  select(quota_sample, country_name, Wanted_TFR) %>% 
+  unique()
+```
+
+### How: Do a systematic regression analysis to answer the research question. You will find the dataset
+
+#### The dependent variables for your analysis are:
+
+-    maternal mortality (MMR_WDI),
+
+-   child mortality (I5M_WDI)
+
+-   fertility (TFR_WDI).
+
+The main independent variable is whether the country has
+
+-   introduced a quota (quota),
+
+-   the year of the introduction (quotayear),
+
+-   the share of women in parliament(women_parliament).
+
+#### Start with some descriptive statistics.
+
+-   Do a systematic regression analysis to answer the research question using the appropriate methodological approach.
+
+-   The regression analysis should include a systematic analysis of the effect of the quota introduction on maternal mortality, child mortality and fertility.
+
+-   Begin your regression analysis by modelling maternal mortality as it is done in Table A2 in the paper (see the notes of the Tables for a description of the approach).
+
+-   Do the same analysis for child mortality and fertility.
+
+    -   You can start with a base-model (single regressor)
+
+    -   and then extend the model to other control variables in the data you think that would be important to take into account.
+
+    -   You can also work with non-linearities and interaction terms to answer the research question.
+
+-   Do the analysis separately for female and male child mortality (I5M_M\_WDI, I5M_F\_DI).
+
+-   You don't need to do an event study (but you can try if you want to).
+
+-   Use a similar IV approach to produce results as shown in table A4 in the paper. Explain the choice of the IV variable and discuss whether you think that the IV a valid.
+
+-   Interpret the regression results with respect to:
+
+    -    the significance of the estimated effects,
+
+    -   their economic meaning
+
+    -   and also with respect to the model performance.
+
+-   Discuss your results from an economic standpoint.
