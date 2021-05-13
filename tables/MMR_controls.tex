@@ -1,0 +1,27 @@
+\begin{table}
+\tablefont
+\caption{ln(Maternal Mortality Ratio) with Controls}
+\centering
+\begin{tabu} to \linewidth {>{\raggedright\arraybackslash}p{60pt}>{\centering}X>{\centering}X>{\centering}X>{\centering}X>{\centering}X}
+\toprule
+  & Base & Gender Policy & Health Expenditure & Health Expenditure & Primary Education & Full\\
+\midrule
+ln(GDP per Capita) & -0.19 & -0.08 & -0.14 & -0.21* & -0.48**\\
+ & [-0.41, 0.04] & [-0.22, 0.06] & [-0.31, 0.04] & [-0.45, 0.03] & [-0.87, -0.08]\\
+Lagged Quota (2Y) & -0.14*** & -0.06** & -0.15*** & -0.13*** & -0.15***\\
+ & [-0.23, -0.06] & [-0.12, -0.01] & [-0.23, -0.07] & [-0.23, -0.03] & [-0.26, -0.05]\\
+Gender Policy in Place &  & -0.07* &  &  & \\
+ &  & [-0.14, 0.00] &  &  & \\
+Health Exp. % of GDP &  &  & 0.04** & 0.06*** & \\
+ &  &  & [0.00, 0.08] & [0.03, 0.10] & \\
+Completed Prim. Educ. &  &  &  & 0.00 & 0.00\\
+ &  &  &  & [-0.01, 0.01] & [-0.01, 0.01]\\
+ln(Absolute Health Exp. Per Capita) &  &  &  &  & 0.19*\\
+ &  &  &  &  & [0.00, 0.38]\\
+N & 2370 & 606 & 2340 & 1377 & 1377\\
+R2 & 0.99 & 1.00 & 1.00 & 1.00 & 1.00\\
+R2 Adj. & 0.99 & 1.00 & 0.99 & 1.00 & 0.99\\
+\bottomrule
+\multicolumn{6}{l}{\textsuperscript{} * p < 0.1, ** p < 0.05, *** p < 0.01}\\
+\end{tabu}
+\end{table}
