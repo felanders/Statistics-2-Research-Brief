@@ -4,23 +4,23 @@
 \centering
 \begin{tabu} to \linewidth {>{\raggedright\arraybackslash}p{60pt}>{\centering}X>{\centering}X>{\centering}X>{\centering}X>{\centering}X}
 \toprule
-  & TFR & ln(TFR) & ln(TFR) + Controls & IV TFR & IV ln(TFR)\\
+  & TFR & ln(TFR) & IV TFR & IV ln(TFR) & ln(TFR) + Controls\\
 \midrule
-ln(GDP per Capita) & -0.19 & -0.09** & 0.09 & -0.19 & -0.04\\
- & [-0.45, 0.07] & [-0.17, 0.00] & [-0.06, 0.25] & [-0.45, 0.07] & [-0.14, 0.05]\\
-Lagged Quota (2Y) & -0.70*** & -0.13** & -0.13*** &  & \\
- & [-1.02, -0.37] & [-0.24, -0.02] & [-0.17, -0.09] &  & \\
-Completed Prim. Educ. &  &  & 0.00 &  & \\
- &  &  & [-0.01, 0.00] &  & \\
-Child Mortality before 5 &  &  & 0.00** &  & \\
- &  &  & [0.00, 0.00] &  & \\
-ln(Absolute Health Exp. Per Capita) &  &  & -0.05 &  & \\
- &  &  & [-0.15, 0.05] &  & \\
-% Women in Parliament &  &  &  & -0.07*** & -0.02*\\
- &  &  &  & [-0.12, -0.02] & [-0.04, 0.00]\\
-N & 5270 & 5270 & 1377 & 2754 & 2754\\
-R2 & 0.94 & 0.94 & 0.99 & 0.95 & 0.96\\
-R2 Adj. & 0.94 & 0.94 & 0.98 & 0.95 & 0.96\\
+ln(GDP per Capita) & -0.19 & -0.09** & -0.19 & -0.04 & 0.09\\
+ & [-0.45, 0.07] & [-0.17, 0.00] & [-0.45, 0.07] & [-0.14, 0.05] & [-0.06, 0.25]\\
+Lagged Quota (2Y) & -0.70*** & -0.13** &  &  & -0.13***\\
+ & [-1.02, -0.37] & [-0.24, -0.02] &  &  & [-0.17, -0.09]\\
+% Women in Parliament &  &  & -0.07*** & -0.02* & \\
+ &  &  & [-0.12, -0.02] & [-0.04, 0.00] & \\
+Completed Prim. Educ. &  &  &  &  & 0.00\\
+ &  &  &  &  & [-0.01, 0.00]\\
+Child Mortality before 5 &  &  &  &  & 0.00**\\
+ &  &  &  &  & [0.00, 0.00]\\
+ln(Absolute Health Exp. Per Capita) &  &  &  &  & -0.05\\
+ &  &  &  &  & [-0.15, 0.05]\\
+N & 5270 & 5270 & 2754 & 2754 & 1377\\
+R2 & 0.94 & 0.94 & 0.95 & 0.96 & 0.99\\
+R2 Adj. & 0.94 & 0.94 & 0.95 & 0.96 & 0.98\\
 \bottomrule
 \multicolumn{6}{l}{\textsuperscript{} * p < 0.1, ** p < 0.05, *** p < 0.01}\\
 \end{tabu}

@@ -306,8 +306,7 @@ df %>%
   unique()
 ```
 
-
-```{r coef map}
+```{r table style}
 coef_map = c("log(gdp_pc)"="ln(GDP per Capita)",
              "women_parliament" = "% Women in Parliament", 
              "quota" = "Quota Dummy", 
@@ -320,9 +319,7 @@ coef_map = c("log(gdp_pc)"="ln(GDP per Capita)",
              "HEA_EXP" = "Health Exp. % of GDP",
              "cpia_gender" = "Gender Policy in Place",
              "log(gdp_pc * HEA_EXP)" = "ln(Absolute Health Exp. Per Capita)")
-```
 
-```{r gm and atat map}
 gm_map <- list(
   list("raw" = "nobs", "clean" = "N", "fmt" = 0),
   list("raw" = "r.squared", "clean" = "R2", "fmt" = 2),
@@ -493,7 +490,6 @@ modelsummary(
   kable_styling(full_width = T) %>% 
   column_spec(1, width="60pt") %>% save_kable("tables/MMR_controls.tex")
 ```
-
 
 # IV
 
@@ -856,15 +852,16 @@ modelsummary(
   column_spec(1, width="60pt") %>% save_kable("tables/TFR_controls.tex")
 ```
 
+## Complete
+
 ```{r tfr complete}
 tfr_comp <- list()
 
 tfr_comp[["TFR"]] <- models_tfr[["(6)"]]
 tfr_comp[["ln(TFR)"]] <- models_tfr[["(9)"]]
-tfr_comp[["ln(TFR) + Controls"]] <- models_tfr_cont[["Full"]]
 tfr_comp[["IV TFR"]] <- models_iv[["(6)"]]
 tfr_comp[["IV ln(TFR)"]] <- models_iv_ln[["(6)"]]
-
+tfr_comp[["ln(TFR) + Controls"]] <- models_tfr_cont[["Full"]]
 
 modelsummary(
   tfr_comp,
@@ -886,10 +883,6 @@ modelsummary(
 # Child Mortality
 
 ## Base
-
--   \% IN parliament
--   ln(I5M_WDI)
--   I5M_WDI
 
 ```{r i5m base}
 models_i5m <- list()
@@ -1057,7 +1050,7 @@ modelsummary(
 
 ## Male and Female
 
-```{r}
+```{r i5m fm}
 models_i5m_fm <- list()
 models_i5m_fm_iv <- list()
 
@@ -1158,6 +1151,35 @@ modelsummary(
   column_spec(1, width="60pt") %>% save_kable("tables/I5M_fm_iv.tex")
 ```
 
+## I5M complete
+
+```{r i5m complete}
+i5m_comp <- list()
+
+i5m_comp[["I5M"]] <- models_i5m[["(6)"]]
+i5m_comp[["ln(I5M)"]] <- models_i5m[["(9)"]]
+i5m_comp[["IV I5M"]] <- models_iv[["(9)"]]
+i5m_comp[["IV ln(I5M)"]] <- models_iv_ln[["(9)"]]
+i5m_comp[["ln(I5M) + Controls"]] <- models_i5m_cont[["Full"]]
+
+
+modelsummary(
+  i5m_comp,
+  fmt = 2,
+  stars = T, 
+  title = "Total Fertility Rate (with country weights exlcuding China and India)",
+  coef_rename = coef_map,
+  statistic = stat_map,
+  coef_omit = "Intercept",
+  gof_map = gm_map,
+  escape = FALSE,
+  format = "latex",
+  gof_omit = "se_type") %>% 
+  kable_styling(full_width = T) %>% 
+  column_spec(1, width="60pt") %>% save_kable("tables/I5M_complete.tex")
+
+```
+
 # All models
 
 ```{r all models with controls}
@@ -1175,7 +1197,6 @@ modelsummary(
   kable_styling(full_width = T) %>% 
   column_spec(1, width="60pt") %>% save_kable("tables/Controls.tex")
 ```
-
 
 
 ## Discussion...
