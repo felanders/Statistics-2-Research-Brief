@@ -10,6 +10,22 @@ output:
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+# Woman's political participation and health
+
+## Empirical problem:
+
+What is the relationship between women's political participation and health?
+
+## Policy question:
+
+Do quotas of parliament seats for women increase the health of women and children?
+
+## Task: Analyze the effect of the introduction of quotas for women in parliament seats on women's and child health.
+
+## Background:
+
+Maternal and child mortality as well as high fertility rates are a major concern in many low-and middle-income countries. In a recent study,Sonia Bhalotra and colleagues (see below) study the effect of increased female political participation on maternal mortality. In doing so, the authors use a novel data set on the introduction of quotas for women in parliament across the world and combine this data with information on women's health. They find that the introduction of quotas for women in parliament results in a 9 to 12%decline in maternal mortality. In this project, you will extend this study by also looking on the effect of women's political participation on child health and fertility. For this you will work with data from the World Development Indicators. You will work with different methods, including panel, diff-in-diff and IV regression.
+
 ### Setup
 
 ```{r, results='hide', message=FALSE}
@@ -18,38 +34,237 @@ library(gtsummary) # descriptive statistics
 library(modelsummary) # alternative to stargazer
 library(estimatr) # regressions with robust SE
 library(knitr) # data frames as latex tables
-
-df <- read.csv("political_participation.csv", header = T)
+library(car)
+library(kableExtra)
+library(tibble)
 ```
 
-```{r}
-names(df)
-summary(df)
+
+```{r, results='hide', message=FALSE}
+df <- read.csv("political_participation.csv", header = T, stringsAsFactors = T)
 ```
 
-```{r}
-df %>% 
-  select(quota_sample, country_name, Wanted_TFR) %>% 
-  unique()
-```
-
-### How: Do a systematic regression analysis to answer the research question. You will find the dataset
+### How: Do a systematic regression analysis to answer the research question.
 
 #### The dependent variables for your analysis are:
 
--    maternal mortality (MMR_WDI),
+-   maternal mortality (MMR_WDI),
+
+```{r mmr summary}
+summary(df$MMR_WDI)
+print("N:")
+length(df$MMR_WDI)
+```
+
+```{r mmr include=FALSE}
+df %>% 
+  ggplot(aes(x=MMR_WDI, y=after_stat(count)
+             )
+         ) +
+  geom_histogram() +
+  labs(x = "Maternal Mortality Ratio", y = "Count") +
+  ggtitle(expression(atop("Maternal Mortality Ratio"))) +
+  scale_fill_viridis_d()
+ggsave("figures/Maternal_Mortality.png")
+```
+
+```{r log mmr include=FALSE}
+df %>% 
+  ggplot(aes(x=log(MMR_WDI), y=after_stat(count)
+             )
+         ) +
+  geom_histogram() +
+  labs(x = "Log Maternal Mortality Ratio", y = "Count") +
+  ggtitle(expression(atop("Log Maternal Mortality Ratio"))) +
+  scale_fill_viridis_d()
+ggsave("figures/Log_Maternal_Mortality.png")
+```
+
+Comment MMR_WDI is only measured after 2000!
+
 
 -   child mortality (I5M_WDI)
 
+```{r i5m include=FALSE}
+df %>% 
+  ggplot(aes(x=I5M_WDI, y=after_stat(count)
+             )
+         ) +
+  geom_histogram() +
+  labs(x = "Child Mortality before 5", y = "Count") +
+  ggtitle(expression(atop("Child Mortality before 5",))) +
+  scale_fill_viridis_d()
+ggsave("figures/Child_Mortality.png")
+```
+
+```{r  log i5m include=FALSE}
+df %>% 
+  ggplot(aes(x=log(I5M_WDI), y=after_stat(count)
+             )
+         ) +
+  geom_histogram() +
+  labs(x = "Log Child Mortality before 5", y = "Count") +
+  ggtitle(expression(atop("Log Child Mortality before 5",))) +
+  scale_fill_viridis_d()
+ggsave("figures/Log_Child_Mortality.png")
+```
+
 -   fertility (TFR_WDI).
 
-The main independent variable is whether the country has
+```{r tfr include=FALSE}
+df %>% 
+  filter(year != 2018) %>% 
+  ggplot(aes(x=TFR_WDI, y=after_stat(count)
+             )
+         ) +
+  geom_histogram(bins=50) +
+  labs(x = "Total Fertility Rate", y = "") +
+  ggtitle(expression(atop("Total Fertility Rate", atop(italic("w/o 2018"), "")))) +
+  scale_fill_viridis_d()
+ggsave("figures/Total_Fertility_Rate.png")
 
--   introduced a quota (quota),
+```
+
+```{r log tfr include=FALSE}
+df %>% 
+  filter(year != 2018) %>% 
+  ggplot(aes(x=log(TFR_WDI), y=after_stat(count)
+             )
+         ) +
+  geom_histogram(bins=50) +
+  labs(x = "Log Total Fertility Rate", y = "") +
+  ggtitle(expression(atop("Log Total Fertility Rate", atop(italic("w/o 2018"), "")))) +
+  scale_fill_viridis_d()
+ggsave("figures/Log_Total_Fertility_Rate.png")
+```
+
+TFR is missing in 2018
+
+The main independent variable is
+
+-   whether the country has introduced a quota (quota),
+
+```{r Quota over time include=FALSE}
+df %>% 
+  group_by(year) %>% 
+  summarise(quota_perc = mean(quota)) %>% 
+  ggplot(aes(x=year, y=quota_perc)) +
+    geom_line() +
+    coord_cartesian(ylim = c(0,1)) + 
+    labs(x = "", y = "Portion of Countries with a Quota", title = "Women Quota over Time") +
+    scale_fill_viridis_d()
+ggsave("figures/Women_Quota_over_Time.png")
+```
+
+```{r Variables time include=FALSE}
+df %>% 
+  group_by(year) %>% 
+  filter(complete.cases(MMR_WDI), complete.cases(I5M_WDI), complete.cases(women_parliament),
+         complete.cases(gdp_pc)) %>% 
+  summarise(mmr = mean(MMR_WDI), tfr = mean(TFR_WDI), i5m = mean(I5M_WDI), 
+            gdp = mean(gdp_pc), wp = mean(women_parliament) ) %>% 
+  mutate(mmr = mmr/max(mmr), tfr = tfr/max(tfr), i5m = i5m/max(i5m), gdp = gdp/max(gdp), wp = wp/max(wp)) %>% 
+  ggplot() +
+    geom_line(aes(x=year, y=mmr, 
+                  color = "Maternal Mortatily Ratio",
+                  linetype = "Maternal Mortatily Ratio")) +
+    geom_line(aes(x=year, y=tfr, 
+                  color = "Total Fertility Rate", 
+                  linetype = "Total Fertility Rate")) +
+    geom_line(aes(x=year, y=i5m, 
+                  color = "Child Mortality before 5", 
+                  linetype = "Child Mortality before 5")) +
+    geom_line(aes(x=year, y=gdp, 
+                  color = "Gross Domestic Product", 
+                  linetype = "Gross Domestic Product")) + 
+    geom_line(aes(x=year, y=wp, 
+                  color = "Percent of Women in Parliament", 
+                  linetype = "Percent of Women in Parliament")) + 
+    coord_cartesian(ylim = c(0,1)) +
+    labs(x = "", y = "Yearly mean scaled by all time maximum", title = "Time Development of Variables of Interest", linetype = "Variables", color = "Variables") +
+    scale_fill_viridis_d()
+ggsave("figures/Time_Variables.png")
+```
+
+```{r variables time scaled include=FALSE}
+df %>% 
+  group_by(year) %>% 
+  filter(complete.cases(I5M_WDI), complete.cases(women_parliament)) %>% 
+  summarise(i5m_f = mean(I5M_F_WDI), i5m_m = mean(I5M_M_WDI), i5m = mean(I5M_WDI)
+            , wp = mean(women_parliament) ) %>% 
+  mutate(i5m_f = i5m_f/max(i5m_f), i5m_m = i5m_m/max(i5m_m), i5m = i5m/max(i5m), wp = wp/max(wp)) %>%
+  ggplot() +
+    geom_line(aes(x=year, y=i5m_f, 
+                  color = "Female Child Mortality before 5", 
+                  linetype = "Female Child Mortality before 5")) +
+    geom_line(aes(x=year, y=i5m_m, 
+                  color = "Male Child Mortality before 5", 
+                  linetype = "Male Child Mortality before 5")) +
+    geom_line(aes(x=year, y=wp, 
+                  color = "Percent of Women in Parliament", 
+                  linetype = "Percent of Women in Parliament")) + 
+    labs(x = "", y = "Yearly mean scaled by all time maximum", title = "Time Development of Variables of Interest", linetype = "Variables", color = "Variables") +
+    scale_fill_viridis_d()
+ggsave("figures/Time_Variables_scaled.png")
+```
+
+```{r Male vs female i5m}
+df %>% 
+  group_by(year) %>% 
+  filter(complete.cases(I5M_F_WDI), complete.cases(I5M_M_WDI)) %>% 
+  summarise(i5mm = mean(I5M_M_WDI), i5mf = mean(I5M_F_WDI), i5m = mean(I5M_WDI)) %>% 
+  ggplot() +
+    geom_line(aes(x=year, y=i5mm, 
+                  color = "Male Child Mortality before 5",
+                  linetype = "Male Child Mortality before 5")) +
+    geom_line(aes(x=year, y=i5mf, 
+                  color = "Female Child Mortality before 5", 
+                  linetype = "Female Child Mortality before 5")) +
+    geom_line(aes(x=year, y=i5m, 
+                  color = "Child Mortality before 5", 
+                  linetype = "Child Mortality before 5")) +
+    labs(x = "", y = "Yearly Mean", title = "Time Development of Child Mortality", linetype = "Variables", color = "Variables") +
+    scale_fill_viridis_d()
+ggsave("figures/Time_I5m.png")
+```
+
 
 -   the year of the introduction (quotayear),
 
+```{r include=FALSE}
+df %>% 
+  select(year) %>% 
+  unique() %>% 
+  count() -> n_years
+
+df %>% 
+  filter(complete.cases(quotayear)) %>% 
+  ggplot(aes(x=quotayear, 
+             y=after_stat(count/n_years$n)
+             )
+         ) +
+  geom_histogram(binwidth = 1) +
+  labs(x = "Year", y = "Count of Countries") +
+  ggtitle(expression(atop("Introduction of Women Quotas in Parliament"))) +
+  scale_fill_viridis_d()
+ggsave("figures/Quota_Introduction.png")
+```
+
 -   the share of women in parliament(women_parliament).
+
+```{r  message=FALSE, include=FALSE}
+df %>% 
+  group_by(year) %>% 
+  filter(complete.cases(women_parliament)) %>% 
+  summarise(parl_share = mean(women_parliament)/100) %>% 
+  ggplot(aes(x=year, y=parl_share)) +
+    geom_line() +
+    annotate("rect", xmin = 1991, xmax = 1997, ymin = 0, ymax = 1, alpha = .5) +
+    coord_cartesian(ylim = c(0,0.5)) + 
+    labs(x = "Year", y = "Average share of Women in Parliaments", title = "Average share of Women in Parliament over Time") +
+    scale_fill_viridis_d()
+ggsave("figures/Share_Women_in_Parliament.png")
+```
 
 #### Start with some descriptive statistics.
 
@@ -67,15 +282,915 @@ The main independent variable is whether the country has
 
     -   You can also work with non-linearities and interaction terms to answer the research question.
 
+##### Variables:
+
+-   MMR_WDI is only measured after 2000!
+
+-   Child mortality (I5M_WDI) 161 missing values (countries with missing values seem to have a slight skew towards higher child mortality compared to other countries) apparently completely missing: Puerto Rico, Kosovo & Greenland -\> 44 remaining most of which are at the beginning of the data (i.e. 1980 ff.)
+
+-   Fertitilty (TFR_WDI) -\> 2018 not measured + 31 missing values (Kosovo 1980, Serbia 1980 - 1999, Seyshelles 1980-1996)
+
+-   Quota, quotayear, women_parliament
+
+# Maternal Mortality
+
+```{r df_w}
+df %>% 
+  filter(country_name != "India", country_name != "China") -> df_w
+```
+
+```{r cpi gender}
+df %>% 
+  filter(complete.cases(cpia_gender), gdp_pc > 10000) %>% 
+  select(country_name, gdp_pc) %>% 
+  unique()
+```
+
+
+```{r coef map}
+coef_map = c("log(gdp_pc)"="ln(GDP per Capita)",
+             "women_parliament" = "% Women in Parliament", 
+             "quota" = "Quota Dummy", 
+             "lag(quota, 2)" = "Lagged Quota (2Y)",
+             "lag(quota, 1)" = "Lagged Quota (1Y)",
+             "I5M_WDI" = "Child Mortality before 5",
+             "EDU_PRIM_WDI" = "Completed Prim. Educ.", 
+             "EDU_PRIM_F_WDI" = "Female Prim. Educ.", 
+             "EDU_PRIM_M_WDI" = "Male Prim. Educ.", 
+             "HEA_EXP" = "Health Exp. % of GDP",
+             "cpia_gender" = "Gender Policy in Place",
+             "log(gdp_pc * HEA_EXP)" = "ln(Absolute Health Exp. Per Capita)")
+```
+
+```{r gm and atat map}
+gm_map <- list(
+  list("raw" = "nobs", "clean" = "N", "fmt" = 0),
+  list("raw" = "r.squared", "clean" = "R2", "fmt" = 2),
+  list("raw" = "adj.r.squared", "clean" = "R2 Adj.", "fmt" = 2))
+
+stat_map = c("conf.int")
+```
+
+## Base
+
+```{r mmr base}
+models_mmr <- list()
+
+models_mmr[["(1)"]] <- lm_robust(
+  women_parliament ~ log(gdp_pc) + lag(quota, 1),
+  clusters = dhscc3,
+  data = df, 
+  fixed_effects = year + dhscc3,
+  se_type = "CR0")
+
+models_mmr[["(2)"]] <- lm_robust(
+  women_parliament ~ log(gdp_pc) + lag(quota, 1),
+  clusters = dhscc3,
+  data = df_w, 
+  fixed_effects = year + dhscc3,
+  se_type = "CR0")
+
+models_mmr[["(3)"]] <- lm_robust(
+  women_parliament ~ log(gdp_pc) + lag(quota, 1),
+  clusters = dhscc3,
+  data = df_w, 
+  weights = pop,
+  fixed_effects = year + dhscc3,
+  se_type = "CR0")
+
+models_mmr[["(4)"]] <- lm_robust(
+  MMR_WDI ~  log(gdp_pc) + lag(quota, 2),
+  clusters = dhscc3,
+  data = df, 
+  fixed_effects = year + dhscc3,
+  se_type = "CR0")
+
+models_mmr[["(5)"]] <- lm_robust(
+  MMR_WDI ~  log(gdp_pc) + lag(quota, 2),
+  clusters = dhscc3,
+  data = df_w, 
+  fixed_effects = year + dhscc3,
+  se_type = "CR0")
+
+models_mmr[["(6)"]] <- lm_robust(
+  MMR_WDI ~  log(gdp_pc) + lag(quota, 2),
+  clusters = dhscc3,
+  data = df_w, 
+  weights = pop,
+  fixed_effects = year + dhscc3,
+  se_type = "CR0")
+
+models_mmr[["(7)"]] <- lm_robust(
+  log(MMR_WDI) ~  log(gdp_pc) + lag(quota, 2),
+  clusters = dhscc3,
+  data = df, 
+  fixed_effects = year + dhscc3,
+  se_type = "CR0")
+
+models_mmr[["(8)"]] <- lm_robust(
+  log(MMR_WDI) ~  log(gdp_pc) + lag(quota, 2),
+  clusters = dhscc3,
+  data = df_w, 
+  fixed_effects = year + dhscc3,
+  se_type = "CR0")
+
+models_mmr[["(9)"]] <- lm_robust(
+  log(MMR_WDI) ~  log(gdp_pc) + lag(quota, 2),
+  clusters = dhscc3,
+  data = df_w, 
+  weights = pop,
+  fixed_effects = year + dhscc3,
+  se_type = "CR0")
+
+
+#### Style of the Table
+rows <- tribble(~term,             ~first,  ~sec, ~th, ~four, ~five, ~six, ~sev, ~eig, ~nin,
+                'Exclude CN + IN',   ' ' ,   '*', '*',   '*',   '*',  '*',  ' ',  '*', '*',
+                'Population Weights',' ' ,   ' ', '*',   ' ',   ' ',  '*',  ' ',  ' ', '*')
+
+attr(rows, 'position') <- c(7,8)
+
+modelsummary(
+  models_mmr, 
+  fmt = 2,
+  stars = T, 
+  title = "Maternal Mortality Ratio Base Model",
+  coef_rename = coef_map,
+  statistic = stat_map,
+  coef_omit = "Intercept",
+  gof_map = gm_map,
+  escape = FALSE,
+  add_rows = rows,
+  format = "latex",
+  gof_omit = "se_type") %>% 
+  add_header_above(c(" " = 1, "% of Women in Parliament" = 3, "Maternal Mortality Ratio" = 3, "ln(Maternal Mortality Ratio)" = 3)) %>% 
+  kable_styling(full_width = T) %>% 
+  column_spec(1, width="60pt")  %>% save_kable("tables/MMR_base.tex")
+```
+
+## Controls
+```{r}
+models_control <- list()
+```
+
+```{r mmr controls}
+models_mmr_cont <- list()
+
+models_mmr_cont[["Base"]] <- lm_robust(
+  log(MMR_WDI) ~  log(gdp_pc) + lag(quota, 2),
+  clusters = dhscc3,
+  data = df_w, 
+  weights = pop,
+  fixed_effects = year + dhscc3,
+  se_type = "CR0")
+
+models_mmr_cont[["Gender Policy"]] <- lm_robust(
+  log(MMR_WDI) ~  log(gdp_pc) + lag(quota, 2) + cpia_gender,
+  clusters = dhscc3,
+  data = df_w, 
+  weights = pop,
+  fixed_effects = year + dhscc3,
+  se_type = "CR0")
+
+models_mmr_cont[["Health Expenditure"]] <- lm_robust(
+  log(MMR_WDI) ~  log(gdp_pc) + lag(quota, 2) + HEA_EXP,
+  clusters = dhscc3,
+  data = df_w, 
+  weights = pop,
+  fixed_effects = year + dhscc3,
+  se_type = "CR0")
+
+models_mmr_cont[["Health Expenditure & Primary Education"]] <- lm_robust(
+  log(MMR_WDI) ~  log(gdp_pc) + lag(quota, 2) + HEA_EXP + EDU_PRIM_WDI,
+  clusters = dhscc3,
+  data = df_w, 
+  weights = pop,
+  fixed_effects = year + dhscc3,
+  se_type = "CR0")
+
+models_mmr_cont[["Full"]] <- lm_robust(
+  log(MMR_WDI) ~  log(gdp_pc) + lag(quota, 2) + log(gdp_pc*HEA_EXP) + EDU_PRIM_WDI,
+  clusters = dhscc3,
+  data = df_w, 
+  weights = pop,
+  fixed_effects = year + dhscc3,
+  se_type = "CR0")
+
+models_control[["ln(MMR)"]] <- models_mmr_cont[["Full"]]
+
+modelsummary(
+  models_mmr_cont, 
+  fmt = 2,
+  stars = T, 
+  title = "ln(Maternal Mortality Ratio) with Controls",
+  coef_rename = coef_map,
+  statistic = stat_map,
+  coef_omit = "Intercept",
+  gof_map = gm_map,
+  escape = FALSE,
+  format = "latex",
+  gof_omit = "se_type") %>% 
+  kable_styling(full_width = T) %>% 
+  column_spec(1, width="60pt") %>% save_kable("tables/MMR_controls.tex")
+```
+
+
+# IV
+
+```{r hypothesis}
+lm_iv_power <- lm_robust(
+  women_parliament ~ quota,
+  weights = pop,
+  data=df_w)
+summary(lm_iv_power)
+```
+
+The instrument is not Weak!
+
+```{r iv base}
+models_iv <- list()
+
+models_iv[["(1)"]] <- iv_robust(
+  MMR_WDI ~ log(gdp_pc) + women_parliament | quota + log(gdp_pc),
+  clusters = dhscc3,
+  data = df, 
+  fixed_effects = year + dhscc3,
+  se_type = "CR0")
+
+models_iv[["(2)"]] <- iv_robust(
+  MMR_WDI ~ log(gdp_pc) + women_parliament | quota + log(gdp_pc),
+  clusters = dhscc3,
+  data = df_w, 
+  fixed_effects = year + dhscc3,
+  se_type = "CR0")
+
+models_iv[["(3)"]] <- iv_robust(
+  MMR_WDI ~ log(gdp_pc) + women_parliament | quota + log(gdp_pc),
+  clusters = dhscc3,
+  data = df_w, 
+  weights = pop,
+  fixed_effects = year + dhscc3,
+  se_type = "CR0")
+
+models_iv[["(4)"]] <- iv_robust(
+  TFR_WDI ~ log(gdp_pc) + women_parliament | quota + log(gdp_pc),
+  clusters = dhscc3,
+  data = df, 
+  fixed_effects = year + dhscc3,
+  se_type = "CR0")
+
+models_iv[["(5)"]] <- iv_robust(
+  TFR_WDI ~ log(gdp_pc) + women_parliament | quota + log(gdp_pc),
+  clusters = dhscc3,
+  data = df_w, 
+  fixed_effects = year + dhscc3,
+  se_type = "CR0")
+
+models_iv[["(6)"]] <- iv_robust(
+  TFR_WDI ~ log(gdp_pc) + women_parliament | quota + log(gdp_pc),
+  clusters = dhscc3,
+  data = df_w, 
+  weights = pop,
+  fixed_effects = year + dhscc3,
+  se_type = "CR0")
+
+models_iv[["(7)"]] <- iv_robust(
+  I5M_WDI ~ log(gdp_pc) + women_parliament | quota + log(gdp_pc),
+  clusters = dhscc3,
+  data = df, 
+  fixed_effects = year + dhscc3,
+  se_type = "CR0")
+
+models_iv[["(8)"]] <- iv_robust(
+  I5M_WDI ~ log(gdp_pc) + women_parliament | quota + log(gdp_pc),
+  clusters = dhscc3,
+  data = df_w, 
+  fixed_effects = year + dhscc3,
+  se_type = "CR0")
+
+models_iv[["(9)"]] <- iv_robust(
+  I5M_WDI ~ log(gdp_pc) + women_parliament | quota + log(gdp_pc),
+  clusters = dhscc3,
+  data = df_w, 
+  weights = pop,
+  fixed_effects = year + dhscc3,
+  se_type = "CR0")
+
+#### Style of the Table
+rows <- tribble(~term,             ~first,  ~sec, ~th, ~four, ~five, ~six, ~sev, ~eig, ~nin,
+                'Exclude CN + IN',   ' ' ,   '*', '*',   '*',   '*',  '*',  ' ',  '*', '*',
+                'Population Weights',' ' ,   ' ', '*',   ' ',   ' ',  '*',  ' ',  ' ', '*')
+
+attr(rows, 'position') <- c(5,6)
+
+modelsummary(
+  models_iv,
+  fmt = 2 ,
+  stars = T, 
+  title = "IV Base Model",
+  coef_rename = coef_map,
+  statistic = stat_map,
+  coef_omit = "Intercept",
+  gof_map = gm_map,
+  escape = FALSE,
+  add_rows = rows,
+  format = "latex",
+  gof_omit = "se_type") %>% 
+  add_header_above(c(" " = 1, "Maternal Mortality Rate" = 3, "Total Fertility Rate" = 3, "Child Mortality" = 3)) %>% 
+  kable_styling(full_width = T) %>% 
+  column_spec(1, width="60pt") %>% save_kable("tables/IV_base.tex")
+```
+
+```{r iv ln base}
+models_iv_ln <- list()
+
+models_iv_ln[["(1)"]] <- iv_robust(
+  log(MMR_WDI) ~ log(gdp_pc) + women_parliament | quota + log(gdp_pc),
+  clusters = dhscc3,
+  data = df, 
+  fixed_effects = year + dhscc3,
+  se_type = "CR0")
+
+models_iv_ln[["(2)"]] <- iv_robust(
+  log(MMR_WDI) ~ log(gdp_pc) + women_parliament | quota + log(gdp_pc),
+  clusters = dhscc3,
+  data = df_w, 
+  fixed_effects = year + dhscc3,
+  se_type = "CR0")
+
+models_iv_ln[["(3)"]] <- iv_robust(
+  log(MMR_WDI) ~ log(gdp_pc) + women_parliament | quota + log(gdp_pc),
+  clusters = dhscc3,
+  data = df_w, 
+  weights = pop,
+  fixed_effects = year + dhscc3,
+  se_type = "CR0")
+
+models_iv_ln[["(4)"]] <- iv_robust(
+  log(TFR_WDI) ~ log(gdp_pc) + women_parliament | quota + log(gdp_pc),
+  clusters = dhscc3,
+  data = df, 
+  fixed_effects = year + dhscc3,
+  se_type = "CR0")
+
+models_iv_ln[["(5)"]] <- iv_robust(
+  log(TFR_WDI) ~ log(gdp_pc) + women_parliament | quota + log(gdp_pc),
+  clusters = dhscc3,
+  data = df_w, 
+  fixed_effects = year + dhscc3,
+  se_type = "CR0")
+
+models_iv_ln[["(6)"]] <- iv_robust(
+  log(TFR_WDI) ~ log(gdp_pc) + women_parliament | quota + log(gdp_pc),
+  clusters = dhscc3,
+  data = df_w, 
+  weights = pop,
+  fixed_effects = year + dhscc3,
+  se_type = "CR0")
+
+models_iv_ln[["(7)"]] <- iv_robust(
+  log(I5M_WDI) ~ log(gdp_pc) + women_parliament | quota + log(gdp_pc),
+  clusters = dhscc3,
+  data = df, 
+  fixed_effects = year + dhscc3,
+  se_type = "CR0")
+
+models_iv_ln[["(8)"]] <- iv_robust(
+  log(I5M_WDI) ~ log(gdp_pc) + women_parliament | quota + log(gdp_pc),
+  clusters = dhscc3,
+  data = df_w, 
+  fixed_effects = year + dhscc3,
+  se_type = "CR0")
+
+models_iv_ln[["(9)"]] <- iv_robust(
+  log(I5M_WDI) ~ log(gdp_pc) + women_parliament | quota + log(gdp_pc),
+  clusters = dhscc3,
+  data = df_w, 
+  weights = pop,
+  fixed_effects = year + dhscc3,
+  se_type = "CR0")
+
+#### Style of the Table
+rows <- tribble(~term,             ~first,  ~sec, ~th, ~four, ~five, ~six, ~sev, ~eig, ~nin,
+                'Exclude CN + IN',   ' ' ,   '*', '*',   '*',   '*',  '*',  ' ',  '*', '*',
+                'Population Weights',' ' ,   ' ', '*',   ' ',   ' ',  '*',  ' ',  ' ', '*')
+
+attr(rows, 'position') <- c(5,6)
+
+modelsummary(
+  models_iv_ln,
+  fmt = 2,
+  stars = T, 
+  title = "",
+  coef_rename = coef_map,
+  statistic = stat_map,
+  coef_omit = "Intercept",
+  gof_map = gm_map,
+  escape = FALSE,
+  add_rows = rows,
+  format = "latex",
+  gof_omit = "se_type") %>% 
+  add_header_above(c(" " = 1, "ln(Maternal Mortality Rate)" = 3, "ln(Total Fertility Rate)" = 3, "ln(Child Mortality)" = 3)) %>% 
+  kable_styling(full_width = T) %>% 
+  column_spec(1, width="60pt")  %>% save_kable("tables/IV_LN_base.tex")
+```
+
+
+# Fertility
+
+## Base
+
+```{r tfr base}
+models_tfr <- list()
+
+models_tfr[["(1)"]] <- lm_robust(
+  women_parliament ~ log(gdp_pc) + lag(quota, 2),
+  clusters = dhscc3,
+  data = df, 
+  fixed_effects = year + dhscc3,
+  se_type = "CR0")
+
+models_tfr[["(2)"]] <- lm_robust(
+  women_parliament ~ log(gdp_pc) + lag(quota, 2),
+  clusters = dhscc3,
+  data = df_w, 
+  fixed_effects = year + dhscc3,
+  se_type = "CR0")
+
+models_tfr[["(3)"]] <- lm_robust(
+  women_parliament ~ log(gdp_pc) + lag(quota, 2),
+  clusters = dhscc3,
+  data = df_w, 
+  weights = pop,
+  fixed_effects = year + dhscc3,
+  se_type = "CR0")
+
+models_tfr[["(4)"]] <- lm_robust(
+  TFR_WDI ~  log(gdp_pc) + lag(quota, 2),
+  clusters = dhscc3,
+  data = df, 
+  fixed_effects = year + dhscc3,
+  se_type = "CR0")
+
+models_tfr[["(5)"]] <- lm_robust(
+  TFR_WDI ~  log(gdp_pc) + lag(quota, 2),
+  clusters = dhscc3,
+  data = df_w, 
+  fixed_effects = year + dhscc3,
+  se_type = "CR0")
+
+models_tfr[["(6)"]] <- lm_robust(
+  TFR_WDI ~  log(gdp_pc) + lag(quota, 2),
+  clusters = dhscc3,
+  data = df_w, 
+  weights = pop,
+  fixed_effects = year + dhscc3,
+  se_type = "CR0")
+
+models_tfr[["(7)"]] <- lm_robust(
+  log(TFR_WDI) ~  log(gdp_pc) + lag(quota, 2),
+  clusters = dhscc3,
+  data = df, 
+  fixed_effects = year + dhscc3,
+  se_type = "CR0")
+
+models_tfr[["(8)"]] <- lm_robust(
+  log(TFR_WDI) ~  log(gdp_pc) + lag(quota, 2),
+  clusters = dhscc3,
+  data = df_w, 
+  fixed_effects = year + dhscc3,
+  se_type = "CR0")
+
+models_tfr[["(9)"]] <- lm_robust(
+  log(TFR_WDI) ~  log(gdp_pc) + lag(quota, 2),
+  clusters = dhscc3,
+  data = df_w, 
+  weights = pop,
+  fixed_effects = year + dhscc3,
+  se_type = "CR0")
+
+#### Style of the Table
+rows <- tribble(~term,             ~first,  ~sec, ~th, ~four, ~five, ~six, ~sev, ~eig, ~nin,
+                'Exclude CN + IN',   ' ' ,   '*', '*',   '*',   '*',  '*',  ' ',  '*', '*',
+                'Population Weights',' ' ,   ' ', '*',   ' ',   ' ',  '*',  ' ',  ' ', '*')
+
+attr(rows, 'position') <- c(5,6)
+
+modelsummary(
+  models_tfr, 
+  fmt = 2,
+  stars = T, 
+  title = "Total Fertility Rate Base Model",
+  coef_rename = coef_map,
+  statistic = stat_map,
+  coef_omit = "Intercept",
+  gof_map = gm_map,
+  escape = FALSE,
+  add_rows = rows,
+  format = "latex",
+  gof_omit = "se_type") %>% 
+  add_header_above(c(" " = 1, "% of Women in Parliament" = 3, "Total Fertitily Rate" = 3, "ln(Total Fertitily Rate)" = 3)) %>% 
+  kable_styling(full_width = T) %>% 
+  column_spec(1, width="60pt") %>% save_kable("tables/TFR_base.tex")
+```
+
+## Controls
+
+```{r tfr controls}
+models_tfr_cont <- list()
+
+models_tfr_cont[["Base"]] <- lm_robust(
+  log(TFR_WDI) ~  log(gdp_pc) + lag(quota, 2),
+  clusters = dhscc3,
+  data = df_w, 
+  weights = pop,
+  fixed_effects = year + dhscc3,
+  se_type = "CR0")
+
+models_tfr_cont[["Gender Policy"]] <- lm_robust(
+  log(TFR_WDI) ~  log(gdp_pc) + lag(quota, 2) + cpia_gender,
+  clusters = dhscc3,
+  data = df_w, 
+  weights = pop,
+  fixed_effects = year + dhscc3,
+  se_type = "CR0")
+
+models_tfr_cont[["Health Expenditure"]] <- lm_robust(
+  log(TFR_WDI) ~  log(gdp_pc) + lag(quota, 2) + HEA_EXP,
+  clusters = dhscc3,
+  data = df_w, 
+  weights = pop,
+  fixed_effects = year + dhscc3,
+  se_type = "CR0")
+
+models_tfr_cont[["Health Expenditure & Primary Education"]] <- lm_robust(
+  log(TFR_WDI) ~  log(gdp_pc) + lag(quota, 2) + HEA_EXP + EDU_PRIM_WDI,
+  clusters = dhscc3,
+  data = df_w, 
+  weights = pop,
+  fixed_effects = year + dhscc3,
+  se_type = "CR0")
+
+models_tfr_cont[["Full"]] <- lm_robust(
+  log(TFR_WDI) ~  log(gdp_pc) + lag(quota, 2)  + EDU_PRIM_WDI + I5M_WDI + log(gdp_pc*HEA_EXP),
+  clusters = dhscc3,
+  data = df_w, 
+  weights = pop,
+  fixed_effects = year + dhscc3,
+  se_type = "CR0")
+
+models_control[["ln(TFR)"]] <- models_tfr_cont[["Full"]]
+
+modelsummary(
+  models_tfr_cont, 
+  stars = T, 
+  title = "ln(Total Fertility Rate) with Controls",
+  coef_rename = coef_map,
+  statistic = stat_map,
+  coef_omit = "Intercept",
+  gof_map = gm_map,
+  escape = FALSE,
+  format = "latex",
+  gof_omit = "se_type") %>% 
+  kable_styling(full_width = T) %>% 
+  column_spec(1, width="60pt") %>% save_kable("tables/TFR_controls.tex")
+```
+
+```{r tfr complete}
+tfr_comp <- list()
+
+tfr_comp[["TFR"]] <- models_tfr[["(6)"]]
+tfr_comp[["ln(TFR)"]] <- models_tfr[["(9)"]]
+tfr_comp[["ln(TFR) + Controls"]] <- models_tfr_cont[["Full"]]
+tfr_comp[["IV TFR"]] <- models_iv[["(6)"]]
+tfr_comp[["IV ln(TFR)"]] <- models_iv_ln[["(6)"]]
+
+
+modelsummary(
+  tfr_comp,
+  fmt = 2,
+  stars = T, 
+  title = "Total Fertility Rate (with country weights exlcuding China and India)",
+  coef_rename = coef_map,
+  statistic = stat_map,
+  coef_omit = "Intercept",
+  gof_map = gm_map,
+  escape = FALSE,
+  format = "latex",
+  gof_omit = "se_type") %>% 
+  kable_styling(full_width = T) %>% 
+  column_spec(1, width="60pt")  %>% save_kable("tables/TFR_complete.tex")
+
+```
+
+# Child Mortality
+
+## Base
+
+-   \% IN parliament
+-   ln(I5M_WDI)
+-   I5M_WDI
+
+```{r i5m base}
+models_i5m <- list()
+
+models_i5m[["(1)"]] <- lm_robust(
+  women_parliament ~ log(gdp_pc) + lag(quota, 1),
+  clusters = dhscc3,
+  data = df, 
+  fixed_effects = year + dhscc3,
+  se_type = "CR0")
+
+models_i5m[["(2)"]] <- lm_robust(
+  women_parliament ~ log(gdp_pc) + lag(quota, 1),
+  clusters = dhscc3,
+  data = df_w, 
+  fixed_effects = year + dhscc3,
+  se_type = "CR0")
+
+models_i5m[["(3)"]] <- lm_robust(
+  women_parliament ~ log(gdp_pc) + lag(quota, 1),
+  clusters = dhscc3,
+  data = df_w, 
+  weights = pop,
+  fixed_effects = year + dhscc3,
+  se_type = "CR0")
+
+models_i5m[["(4)"]] <- lm_robust(
+  I5M_WDI ~  log(gdp_pc) + lag(quota, 2),
+  clusters = dhscc3,
+  data = df, 
+  fixed_effects = year + dhscc3,
+  se_type = "CR0")
+
+models_i5m[["(5)"]] <- lm_robust(
+  I5M_WDI ~  log(gdp_pc) + lag(quota, 2),
+  clusters = dhscc3,
+  data = df_w, 
+  fixed_effects = year + dhscc3,
+  se_type = "CR0")
+
+models_i5m[["(6)"]] <- lm_robust(
+  I5M_WDI ~  log(gdp_pc) + lag(quota, 2),
+  clusters = dhscc3,
+  data = df_w, 
+  weights = pop,
+  fixed_effects = year + dhscc3,
+  se_type = "CR0")
+
+models_i5m[["(7)"]] <- lm_robust(
+  log(I5M_WDI) ~  log(gdp_pc) + lag(quota, 2),
+  clusters = dhscc3,
+  data = df, 
+  fixed_effects = year + dhscc3,
+  se_type = "CR0")
+
+models_i5m[["(8)"]] <- lm_robust(
+  log(I5M_WDI) ~  log(gdp_pc) + lag(quota, 2),
+  clusters = dhscc3,
+  data = df_w, 
+  fixed_effects = year + dhscc3,
+  se_type = "CR0")
+
+models_i5m[["(9)"]] <- lm_robust(
+  log(I5M_WDI) ~  log(gdp_pc) + lag(quota, 2),
+  clusters = dhscc3,
+  data = df_w, 
+  weights = pop,
+  fixed_effects = year + dhscc3,
+  se_type = "CR0")
+
+#### Style of the Table
+rows <- tribble(~term,             ~first,  ~sec, ~th, ~four, ~five, ~six, ~sev, ~eig, ~nin,
+                'Exclude CN + IN',   ' ' ,   '*', '*',   '*',   '*',  '*',  ' ',  '*', '*',
+                'Population Weights',' ' ,   ' ', '*',   ' ',   ' ',  '*',  ' ',  ' ', '*')
+
+attr(rows, 'position') <- c(7,8)
+
+modelsummary(
+  models_i5m, 
+  fmt = 2,
+  stars = T, 
+  title = "Child Mortality before 5 Base Model",
+  coef_rename = coef_map,
+  statistic = stat_map,
+  coef_omit = "Intercept",
+  gof_map = gm_map,
+  escape = FALSE,
+  add_rows = rows,
+  format = "latex",
+  gof_omit = "se_type") %>% 
+  add_header_above(c(" " = 1, "% of Women in Parliament" = 3, "Child Mortality" = 3, "ln(Child Mortality)" = 3)) %>% 
+  kable_styling(full_width = T) %>% 
+  column_spec(1, width="60pt") %>% save_kable("tables/I5M_base.tex")
+```
+
+## Controls
+
+```{r i5m controls}
+models_i5m_cont <- list()
+
+models_i5m_cont[["Base"]] <- lm_robust(
+  log(I5M_WDI) ~  log(gdp_pc) + lag(quota, 2),
+  clusters = dhscc3,
+  data = df_w, 
+  weights = pop,
+  fixed_effects = year + dhscc3,
+  se_type = "CR0")
+
+models_i5m_cont[["Gender Policy"]] <- lm_robust(
+  log(I5M_WDI) ~  log(gdp_pc) + lag(quota, 2) + cpia_gender,
+  clusters = dhscc3,
+  data = df_w, 
+  weights = pop,
+  fixed_effects = year + dhscc3,
+  se_type = "CR0")
+
+models_i5m_cont[["Health Expenditure"]] <- lm_robust(
+  log(I5M_WDI) ~  log(gdp_pc) + lag(quota, 2) + HEA_EXP,
+  clusters = dhscc3,
+  data = df_w, 
+  weights = pop,
+  fixed_effects = year + dhscc3,
+  se_type = "CR0")
+
+models_i5m_cont[["Health Expenditure & Primary Education"]] <- lm_robust(
+  log(I5M_WDI) ~  log(gdp_pc) + lag(quota, 2) + HEA_EXP + EDU_PRIM_WDI,
+  clusters = dhscc3,
+  data = df_w, 
+  weights = pop,
+  fixed_effects = year + dhscc3,
+  se_type = "CR0")
+
+models_i5m_cont[["Full"]] <- lm_robust(
+  log(I5M_WDI) ~  log(gdp_pc) + lag(quota, 2)  + EDU_PRIM_WDI  + log(gdp_pc*HEA_EXP),
+  clusters = dhscc3,
+  data = df_w, 
+  weights = pop,
+  fixed_effects = year + dhscc3,
+  se_type = "CR0")
+
+models_control[["ln(I5M)"]] <- models_i5m_cont[["Full"]]
+models_control[["I5M"]] <- lm_robust(
+  I5M_WDI ~  log(gdp_pc) + lag(quota, 2)  + EDU_PRIM_WDI  + log(gdp_pc*HEA_EXP),
+  clusters = dhscc3,
+  data = df_w, 
+  weights = pop,
+  fixed_effects = year + dhscc3,
+  se_type = "CR0")
+
+modelsummary(
+  models_i5m_cont, 
+  fmt = 2,
+  stars = T, 
+  title = "ln(Child Mortality before 5) Controls",
+  coef_rename = coef_map,
+  statistic = stat_map,
+  coef_omit = "Intercept",
+  gof_map = gm_map,
+  escape = FALSE,
+  format = "latex",
+  gof_omit = "se_type") %>% 
+  kable_styling(full_width = T) %>% 
+  column_spec(1, width="60pt") %>% save_kable("tables/I5M_controls.tex")
+```
+
+## Male and Female
+
+```{r}
+models_i5m_fm <- list()
+models_i5m_fm_iv <- list()
+
+models_i5m_fm[["Base Female"]] <- lm_robust(
+  log(I5M_F_WDI) ~  log(gdp_pc) + lag(quota, 2),
+  clusters = dhscc3,
+  data = df_w, 
+  weights = pop,
+  fixed_effects = year + dhscc3,
+  se_type = "CR0")
+
+models_i5m_fm[["Base Male"]] <- lm_robust(
+  log(I5M_M_WDI) ~  log(gdp_pc) + lag(quota, 2),
+  clusters = dhscc3,
+  data = df_w, 
+  weights = pop,
+  fixed_effects = year + dhscc3,
+  se_type = "CR0")
+
+models_i5m_fm[["Full Female"]] <- lm_robust(
+  log(I5M_F_WDI) ~  log(gdp_pc) + lag(quota, 2)  + EDU_PRIM_WDI + EDU_PRIM_F_WDI +
+    EDU_PRIM_M_WDI + log(gdp_pc*HEA_EXP),
+  clusters = dhscc3,
+  data = df_w, 
+  weights = pop,
+  fixed_effects = year + dhscc3,
+  se_type = "CR0")
+
+models_i5m_fm[["Full Male"]] <- lm_robust(
+  log(I5M_M_WDI) ~  log(gdp_pc) + lag(quota, 2) + EDU_PRIM_WDI + EDU_PRIM_F_WDI +
+    EDU_PRIM_M_WDI + log(gdp_pc*HEA_EXP),
+  clusters = dhscc3,
+  data = df_w, 
+  weights = pop,
+  fixed_effects = year + dhscc3,
+  se_type = "CR0")
+
+models_i5m_fm_iv[["Female"]] <- iv_robust(
+  I5M_F_WDI ~ log(gdp_pc) + women_parliament | quota + log(gdp_pc),
+  clusters = dhscc3,
+  data = df_w, 
+  weights = pop,
+  fixed_effects = year + dhscc3,
+  se_type = "CR0")
+
+models_i5m_fm_iv[["Male"]] <- iv_robust(
+  I5M_M_WDI ~ log(gdp_pc) + women_parliament | quota + log(gdp_pc),
+  clusters = dhscc3,
+  data = df_w, 
+  weights = pop,
+  fixed_effects = year + dhscc3,
+  se_type = "CR0")
+
+models_i5m_fm_iv[["ln(Female)"]] <- iv_robust(
+  log(I5M_F_WDI) ~ log(gdp_pc) + women_parliament | quota + log(gdp_pc),
+  clusters = dhscc3,
+  data = df_w, 
+  weights = pop,
+  fixed_effects = year + dhscc3,
+  se_type = "CR0")
+
+models_i5m_fm_iv[["ln(Male)"]] <- iv_robust(
+  log(I5M_M_WDI) ~ log(gdp_pc) + women_parliament | quota + log(gdp_pc),
+  clusters = dhscc3,
+  data = df_w, 
+  weights = pop,
+  fixed_effects = year + dhscc3,
+  se_type = "CR0")
+
+modelsummary(
+  models_i5m_fm, 
+  fmt = 2,
+  stars = T, 
+  title = "ln(Child Mortality before 5) Female and Male",
+  coef_rename = coef_map,
+  statistic = stat_map,
+  coef_omit = "Intercept",
+  gof_map = gm_map,
+  escape = FALSE,
+  format = "latex",
+  gof_omit = "se_type") %>% 
+  kable_styling(full_width = T) %>% 
+  column_spec(1, width="60pt") %>% save_kable("tables/I5M_fm.tex")
+
+modelsummary(
+  models_i5m_fm_iv, 
+  fmt = 2,
+  stars = T, 
+  title = "IV for Child Mortality before 5 Female and Male",
+  coef_rename = coef_map,
+  statistic = stat_map,
+  coef_omit = "Intercept",
+  gof_map = gm_map,
+  escape = FALSE,
+  format = "latex",
+  gof_omit = "se_type") %>% 
+  kable_styling(full_width = T) %>% 
+  column_spec(1, width="60pt") %>% save_kable("tables/I5M_fm_iv.tex")
+```
+
+# All models
+
+```{r all models with controls}
+modelsummary(
+  models_control, 
+  fmt = 2,
+  stars = T, 
+  coef_rename = coef_map,
+  statistic = stat_map,
+  coef_omit = "Intercept",
+  gof_map = gm_map,
+  escape = FALSE,
+  format = "latex",
+  gof_omit = "se_type") %>% 
+  kable_styling(full_width = T) %>% 
+  column_spec(1, width="60pt") %>% save_kable("tables/Controls.tex")
+```
+
+
+
+## Discussion...
+
 -   Do the analysis separately for female and male child mortality (I5M_M\_WDI, I5M_F\_DI).
 
 -   You don't need to do an event study (but you can try if you want to).
 
--   Use a similar IV approach to produce results as shown in table A4 in the paper. Explain the choice of the IV variable and discuss whether you think that the IV a valid.
+-   Use a similar IV approach to produce results as shown in table A4 in the paper.
+
+-   Explain the choice of the IV variable and discuss whether you think that the IV a valid.
 
 -   Interpret the regression results with respect to:
 
-    -    the significance of the estimated effects,
+    -   the significance of the estimated effects,
 
     -   their economic meaning
 
