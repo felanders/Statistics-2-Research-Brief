@@ -1,0 +1,26 @@
+\begin{table}
+
+\caption{Total Fertility Rate (with country weights exlcuding China and India)}
+\centering
+\begin{tabu} to \linewidth {>{\raggedright\arraybackslash}p{60pt}>{\centering}X>{\centering}X>{\centering}X>{\centering}X>{\centering}X>{\centering}X}
+\toprule
+  & MMR & ln(MMR) & IV MMR & IV ln(MMR) & ln(MMR) + Controls & Placebo: ln(GDP)\\
+\midrule
+ln(GDP per Capita) & -74.504*** & -0.186 & -94.063* & -0.569*** & -0.477** & \\
+ & [-125.598, -23.410] & [-0.411, 0.039] & [-192.509, 4.383] & [-0.863, -0.274] & [-0.874, -0.079] & \\
+Lagged Quota (2Y) & -71.269*** & -0.144*** &  &  & -0.154*** & 0.052\\
+ & [-111.794, -30.745] & [-0.228, -0.060] &  &  & [-0.260, -0.049] & [-0.010, 0.115]\\
+ln(Absolute Health Exp. Per Capita) &  &  & 70.175 & 0.312** & 0.188* & 0.671***\\
+ &  &  & [-44.522, 184.872] & [0.042, 0.582] & [-0.004, 0.381] & [0.558, 0.784]\\
+Completed Prim. Educ. &  &  & 0.472 & -0.003 & -0.002 & 0.003\\
+ &  &  & [-2.624, 3.569] & [-0.013, 0.006] & [-0.013, 0.009] & [-0.003, 0.008]\\
+Lagged SWP &  &  & -20.728*** & -0.041** &  & \\
+ &  &  & [-35.803, -5.653] & [-0.075, -0.007] &  & \\
+N & 2370 & 2370 & 1312 & 1312 & 1377 & 1377\\
+R2 & 0.98 & 0.99 & 0.89 & 0.99 & 1.00 & 1.00\\
+R2 Adj. & 0.97 & 0.99 & 0.88 & 0.99 & 0.99 & 1.00\\
+F &  &  &  &  &  & \\
+\bottomrule
+\multicolumn{7}{l}{\textsuperscript{} * p < 0.1, ** p < 0.05, *** p < 0.01}\\
+\end{tabu}
+\end{table}
