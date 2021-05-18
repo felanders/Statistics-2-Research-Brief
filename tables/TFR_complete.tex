@@ -2,7 +2,7 @@
 \tablefontapp
 \caption{Total Fertility Rate (with country weights exlcuding China and India) \label{tab:tfr}}
 \centering
-\begin{tabu} to \linewidth {>{\raggedright\arraybackslash}p{60pt}>{\centering}X>{\centering}X>{\centering}X>{\centering}X>{\centering}X>{\centering}X>{\centering}X>{\centering}X}
+\begin{tabular}[t]{>{\raggedright\arraybackslash}p{60pt}cccccccc}
 \toprule
   & TFR & ln(TFR) Base & ln(TFR) Cont. 1 & ln(TFR) Cont. 2 & ln(TFR) Cont. 3 & ln(TFR) Full & IV TFR & IV ln(TFR)\\
 \midrule
@@ -23,6 +23,8 @@ N & 5270 & 5270 & 606 & 2340 & 2480 & 266 & 1312 & 1312\\
 R2 & 0.94 & 0.94 & 0.99 & 0.98 & 0.95 & 1.00 & 0.94 & 0.92\\
 R2 Adj. & 0.94 & 0.94 & 0.99 & 0.98 & 0.95 & 1.00 & 0.93 & 0.91\\
 \bottomrule
+\multicolumn{9}{l}{\rule{0pt}{1em}\textit{Note: }}\\
+\multicolumn{9}{l}{\rule{0pt}{1em}All models include country and year fixed effects. Standard errors clustered by country, and 95\% confidence intervals are presented in square brackets.}\\
 \multicolumn{9}{l}{\textsuperscript{} * p < 0.1, ** p < 0.05, *** p < 0.01}\\
-\end{tabu}
+\end{tabular}
 \end{table}

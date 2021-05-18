@@ -1,8 +1,8 @@
 \begin{table}
 \tablefontapp
-\caption{Female and Male Child Mortality before 5\label{tab:i5m_fm}}
+\caption{Female and Male Child Mortality before 5 \label{tab:i5m_fm}}
 \centering
-\begin{tabu} to \linewidth {>{\raggedright\arraybackslash}p{60pt}>{\centering}X>{\centering}X>{\centering}X>{\centering}X>{\centering}X>{\centering}X>{\centering}X>{\centering}X}
+\begin{tabular}[t]{>{\raggedright\arraybackslash}p{60pt}cccccccc}
 \toprule
 \multicolumn{1}{c}{ } & \multicolumn{4}{c}{Female Child Mortality before 5} & \multicolumn{4}{c}{Male Child Mortality before 5} \\
 \cmidrule(l{3pt}r{3pt}){2-5} \cmidrule(l{3pt}r{3pt}){6-9}
@@ -20,11 +20,13 @@ Health Exp. perc. of GDP &  & 0.01 & 0.85 & 0.00 &  & 0.01 & 0.86 & 0.00\\
  &  & [-0.02, 0.04] & [-1.46, 3.16] & [-0.04, 0.03] &  & [-0.02, 0.04] & [-1.63, 3.35] & [-0.04, 0.03]\\
 Lagged SWP (1Y) &  &  & -1.23*** & -0.01*** &  &  & -1.19*** & -0.01***\\
  &  &  & [-1.72, -0.73] & [-0.02, 0.00] &  &  & [-1.70, -0.67] & [-0.02, 0.00]\\
-\midrule
 N & 3950 & 1035 & 1005 & 1005 & 3950 & 1035 & 1005 & 1005\\
+\midrule
 R2 & 0.99 & 1.00 & 0.97 & 1.00 & 0.99 & 1.00 & 0.98 & 1.00\\
 R2 Adj. & 0.99 & 1.00 & 0.97 & 1.00 & 0.99 & 1.00 & 0.98 & 1.00\\
 \bottomrule
+\multicolumn{9}{l}{\rule{0pt}{1em}\textit{Note: }}\\
+\multicolumn{9}{l}{\rule{0pt}{1em}All models include country and year fixed effects. Standard errors clustered by country, and 95\% confidence intervals are presented in square brackets.}\\
 \multicolumn{9}{l}{\textsuperscript{} * p < 0.1, ** p < 0.05, *** p < 0.01}\\
-\end{tabu}
+\end{tabular}
 \end{table}
