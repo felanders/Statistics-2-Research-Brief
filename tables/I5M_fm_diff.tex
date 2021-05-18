@@ -1,0 +1,28 @@
+\begin{table}
+
+\caption{Male minus Female Child Mortality before 5}
+\centering
+\begin{tabu} to \linewidth {>{\raggedright\arraybackslash}p{60pt}>{\centering}X>{\centering}X>{\centering}X>{\centering}X}
+\toprule
+  & Base & ln() & IV & IV ln()\\
+\midrule
+ln(GDP per Capita) & -0.79*** & -0.12 & -2.12*** & -0.12\\
+ & [-1.38, -0.20] & [-0.32, 0.09] & [-2.89, -1.34] & [-0.32, 0.09]\\
+Lagged Quota (2Y) & 1.60 &  &  & \\
+ & [-0.58, 3.77] &  &  & \\
+Female Prim. Educ. &  & -0.01 & 0.00 & -0.01\\
+ &  & [-0.01, 0.00] & [-0.03, 0.03] & [-0.01, 0.00]\\
+Male Prim. Educ. &  & 0.00 & -0.03 & 0.00\\
+ &  & [-0.01, 0.01] & [-0.09, 0.02] & [-0.01, 0.01]\\
+Health Exp. perc. of GDP &  & -0.01 & 0.01 & -0.01\\
+ &  & [-0.05, 0.03] & [-0.28, 0.30] & [-0.05, 0.03]\\
+Lagged SWP (1Y) &  & 0.00 & 0.04*** & 0.00\\
+ &  & [-0.01, 0.02] & [0.01, 0.06] & [-0.01, 0.02]\\
+\midrule
+N & 3950 & 1005 & 1005 & 1005\\
+R2 & 0.96 & 1.00 & 0.99 & 1.00\\
+R2 Adj. & 0.96 & 0.99 & 0.99 & 0.99\\
+\bottomrule
+\multicolumn{5}{l}{\textsuperscript{} * p < 0.1, ** p < 0.05, *** p < 0.01}\\
+\end{tabu}
+\end{table}

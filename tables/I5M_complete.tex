@@ -1,25 +1,28 @@
 \begin{table}
 \tablefont
-\caption{Total Fertility Rate (with country weights exlcuding China and India)}
+\caption{Child Mortality before 5 (with country weights exlcuding China and India) \label{tab:i5m}}
 \centering
-\begin{tabu} to \linewidth {>{\raggedright\arraybackslash}p{60pt}>{\centering}X>{\centering}X>{\centering}X>{\centering}X>{\centering}X}
+\begin{tabu} to \linewidth {>{\raggedright\arraybackslash}p{60pt}>{\centering}X>{\centering}X>{\centering}X>{\centering}X>{\centering}X>{\centering}X}
 \toprule
-  & I5M & ln(I5M) & IV I5M & IV ln(I5M) & ln(I5M) + Controls\\
+  & I5M & ln(I5M) Base & ln(I5M) Cont. 2 & ln(I5M) Full & IV I5M & IV ln(I5M)\\
 \midrule
-ln(GDP per Capita) & -3.77 & -0.18*** & -13.38*** & -0.17*** & -0.26**\\
- & [-13.53, 6.00] & [-0.30, -0.07] & [-23.21, -3.55] & [-0.30, -0.04] & [-0.46, -0.06]\\
-Lagged Quota (2Y) & -25.51*** & 0.00 &  &  & -0.02\\
- & [-39.79, -11.22] & [-0.18, 0.18] &  &  & [-0.16, 0.13]\\
-% Women in Parliament &  &  & -2.71** & -0.01 & \\
- &  &  & [-4.98, -0.44] & [-0.03, 0.02] & \\
-Completed Prim. Educ. &  &  &  &  & 0.00\\
- &  &  &  &  & [-0.01, 0.00]\\
-ln(Absolute Health Exp. Per Capita) &  &  &  &  & 0.01\\
- &  &  &  &  & [-0.14, 0.15]\\
-N & 5273 & 5273 & 2755 & 2755 & 1377\\
-R2 & 0.92 & 0.99 & 0.91 & 0.99 & 1.00\\
-R2 Adj. & 0.92 & 0.98 & 0.91 & 0.99 & 1.00\\
+ln(GDP per Capita) & -3.77 & -0.18*** & -0.10 & 0.01 & -9.02 & -0.22***\\
+ & [-13.53, 6.00] & [-0.30, -0.07] & [-0.23, 0.03] & [-0.10, 0.11] & [-25.69, 7.64] & [-0.38, -0.06]\\
+Lagged Quota (2Y) & -25.51*** & 0.00 & -0.04 & -0.09*** &  & \\
+ & [-39.79, -11.22] & [-0.18, 0.18] & [-0.14, 0.07] & [-0.14, -0.04] &  & \\
+Health Exp. perc. of GDP &  &  & 0.02 & 0.01 & 1.13 & 0.01\\
+ &  &  & [-0.01, 0.04] & [-0.02, 0.03] & [-2.72, 4.98] & [-0.03, 0.05]\\
+Completed Prim. Educ. &  &  &  & 0.01* & 0.03 & 0.00\\
+ &  &  &  & [0.00, 0.01] & [-0.51, 0.58] & [-0.01, 0.00]\\
+Gender Policy in Place &  &  &  & 0.06 &  & \\
+ &  &  &  & [-0.02, 0.13] &  & \\
+Lagged SWP (1Y) &  &  &  &  & -3.16** & -0.02***\\
+ &  &  &  &  & [-5.71, -0.61] & [-0.03, -0.01]\\
+\midrule
+N & 5273 & 5273 & 2340 & 266 & 1312 & 1312\\
+R2 & 0.92 & 0.99 & 1.00 & 1.00 & 0.91 & 0.99\\
+R2 Adj. & 0.92 & 0.98 & 1.00 & 1.00 & 0.90 & 0.99\\
 \bottomrule
-\multicolumn{6}{l}{\textsuperscript{} * p < 0.1, ** p < 0.05, *** p < 0.01}\\
+\multicolumn{7}{l}{\textsuperscript{} * p < 0.1, ** p < 0.05, *** p < 0.01}\\
 \end{tabu}
 \end{table}

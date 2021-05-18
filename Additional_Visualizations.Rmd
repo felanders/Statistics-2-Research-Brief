@@ -1,0 +1,146 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+
+```{r, results='hide', message=FALSE}
+library(tidyverse) 
+library(gtsummary) # descriptive statistics
+library(modelsummary) # alternative to stargazer
+library(estimatr) # regressions with robust SE
+library(knitr) # data frames as latex tables
+library(car)
+library(kableExtra)
+library(tibble)
+```
+
+
+```{r, results='hide', message=FALSE}
+df <- read.csv("political_participation.csv", header = T, stringsAsFactors = T)
+```
+
+# Overall inforamtion
+Number of countries
+```{r}
+df %>% 
+  select(dhscc3) %>% 
+  unique() %>% 
+  count()
+```
+
+Years 
+```{r}
+df %>% 
+  select(year) %>% 
+  unique()
+```
+
+# Maps
+```{r}
+library(viridis)
+library(RColorBrewer)
+```
+
+
+```{r}
+png(file="./figures/Quota_Intro_Map.png",width=1200, height=700)
+df_map <- df %>% filter(year == 2017, complete.cases(MMR_WDI)) 
+mapped_data <- joinCountryData2Map(df_map, joinCode = "ISO3", 
+    nameJoinColumn = "dhscc3")
+#calling mapCountryData with the parameters from classInt and RColorBrewer
+mapParams <- mapCountryData( mapped_data, nameColumnToPlot = "quotayear", addLegend=FALSE
+                           ,  colourPalette=rev(viridis(7)))
+
+do.call(addMapLegend, c(mapParams
+                       ,legendLabels="all"
+                       ,legendWidth=0.5
+                       ,legendIntervals="data"))
+dev.off()
+```
+
+```{r}
+png(file="./figures/MMR_Map_2000.png",width=1200, height=700)
+df_map <- df %>% filter(year == 2000, complete.cases(MMR_WDI)) #%>% mutate(Quota_Introduction = quotayear)
+#calling mapCountryData with the parameters from classInt and RColorBrewer
+mapped_data <- joinCountryData2Map(df_map, joinCode = "ISO3", 
+    nameJoinColumn = "dhscc3")
+mapParams <- mapCountryData( mapped_data, nameColumnToPlot = "MMR_WDI", addLegend=FALSE
+                           ,  colourPalette=rev(viridis(7)))
+
+do.call(addMapLegend, c(mapParams
+                       ,legendLabels="all"
+                       ,legendWidth=0.5
+                       ,legendIntervals="data"))
+dev.off()
+```
+
+```{r}
+png(file="./figures/MMR_Map_2017.png",width=1200, height=700)
+df_map <- df %>% filter(year == 2017, complete.cases(MMR_WDI)) #%>% mutate(Quota_Introduction = quotayear)
+#calling mapCountryData with the parameters from classInt and RColorBrewer
+mapped_data <- joinCountryData2Map(df_map, joinCode = "ISO3", 
+    nameJoinColumn = "dhscc3")
+mapParams <- mapCountryData( mapped_data, nameColumnToPlot = "MMR_WDI", addLegend=FALSE
+                           ,  colourPalette=rev(viridis(7)))
+
+do.call(addMapLegend, c(mapParams
+                       ,legendLabels="all"
+                       ,legendWidth=0.5
+                       ,legendIntervals="data"))
+dev.off()
+```
+
+
+# Checking the Log normal form for differnet subsets of the data
+
+Arabic Countries
+```{r}
+df %>% 
+  filter(ARAB == 1) %>% 
+  ggplot(aes(x=I5M_WDI, y=after_stat(count)
+             )
+         ) +
+  geom_histogram() +
+  labs(x = "Child Mortality before 5", y = "Count") +
+  ggtitle(expression(atop("Child Mortality before 5",))) +
+  scale_fill_viridis_d()
+```
+
+Sub Saharan Afric
+```{r}
+df %>% 
+  filter(SSA == 1) %>% 
+  ggplot(aes(x=I5M_WDI, y=after_stat(count)
+             )
+         ) +
+  geom_histogram() +
+  labs(x = "Child Mortality before 5", y = "Count") +
+  ggtitle(expression(atop("Child Mortality before 5",))) +
+  scale_fill_viridis_d()
+```
+
+Germany 
+```{r}
+df %>% 
+  filter(country_name == "Germany") %>% 
+  ggplot(aes(x=I5M_WDI, y=after_stat(count)
+             )
+         ) +
+  geom_histogram() +
+  labs(x = "Child Mortality before 5", y = "Count") +
+  ggtitle(expression(atop("Child Mortality before 5",))) +
+  scale_fill_viridis_d()
+```
+Togo
+```{r}
+df %>% 
+  filter(country_name == "Togo") %>% 
+  ggplot(aes(x=I5M_WDI, y=after_stat(count)
+             )
+         ) +
+  geom_histogram() +
+  labs(x = "Child Mortality before 5", y = "Count") +
+  ggtitle(expression(atop("Child Mortality before 5",))) +
+  scale_fill_viridis_d()
+```
