@@ -2,7 +2,7 @@
 \tablefontapp
 \caption{Male minus Female Child Mortality before 5 \label{tab:i5m_diff}}
 \centering
-\begin{tabular}[t]{>{\raggedright\arraybackslash}p{60pt}cccc}
+\begin{tabu} to \linewidth {>{\raggedright\arraybackslash}p{60pt}>{\centering}X>{\centering}X>{\centering}X>{\centering}X}
 \toprule
   & Base & ln() & IV & IV ln()\\
 \midrule
@@ -26,5 +26,5 @@ R2 Adj. & 0.96 & 0.99 & 0.99 & 0.99\\
 \multicolumn{5}{l}{\rule{0pt}{1em}\textit{Note: }}\\
 \multicolumn{5}{l}{\rule{0pt}{1em}All models include country and year fixed effects. Standard errors clustered by country, and 95\% confidence intervals are presented in square brackets.}\\
 \multicolumn{5}{l}{\textsuperscript{} * p < 0.1, ** p < 0.05, *** p < 0.01}\\
-\end{tabular}
+\end{tabu}
 \end{table}

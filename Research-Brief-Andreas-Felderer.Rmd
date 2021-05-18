@@ -394,17 +394,18 @@ modelsummary(
   models_mmr, 
   fmt = 2,
   stars = T, 
-  title = "Maternal Mortality Ratio Base Model",
+  title = "Reproducing Results of \\citep{bhalotra_maternal_2018}  \\label{tab:reprod}",
   coef_rename = coef_map,
   statistic = stat_map,
   coef_omit = "Intercept",
   gof_map = gm_map,
-  escape = FALSE,
+  escape = F,
   add_rows = rows,
   format = "latex",
   conf_level = .95,
   gof_omit = "se_type") %>% 
   add_header_above(c(" " = 1, "% of Women in Parliament" = 3, "Maternal Mortality Ratio" = 3, "ln(Maternal Mortality Ratio)" = 3)) %>% 
+  footnote("All models include country and year fixed effects. Standard errors clustered by country, and 95% confidence intervals are presented in square brackets.") %>% 
   kable_styling(full_width = T) %>% 
   column_spec(1, width="60pt")  %>% save_kable("tables/MMR_base.tex")
 ```
@@ -809,7 +810,7 @@ mmr_comp[["Placebo: ln(GDP)"]] <- models_mmr_cont[["Placebo: ln(GDP)"]]
 
 modelsummary(
   mmr_comp,
-  fmt =2,
+  fmt = 2,
   stars = T, 
   title = "Maternal Mortality Ratio (with country weights exlcuding China and India)",
   coef_rename = coef_map,
@@ -821,6 +822,7 @@ modelsummary(
   conf_level = .95,
   gof_omit = "se_type") %>% 
   kable_styling(full_width = T) %>% 
+  footnote("All models include country and year fixed effects. Standard errors clustered by country, and 95% confidence intervals are presented in square brackets.") %>% 
   column_spec(1, width="60pt")  %>% save_kable("tables/MMR_complete.tex")
 ```
 
@@ -1004,7 +1006,7 @@ modelsummary(
   tfr_comp,
   fmt = 2,
   stars = T, 
-  title = "Total Fertility Rate (with country weights exlcuding China and India)",
+  title = "Total Fertility Rate (with country weights exlcuding China and India) \\label{tab:tfr}",
   coef_rename = coef_map,
   statistic = stat_map,
   coef_omit = "Intercept",
@@ -1013,7 +1015,8 @@ modelsummary(
   format = "latex",
   conf_level = .95,
   gof_omit = "se_type") %>% 
-  kable_styling(full_width = T) %>% 
+  kable_styling(full_width = F) %>% 
+  footnote("All models include country and year fixed effects. Standard errors clustered by country, and 95% confidence intervals are presented in square brackets.") %>% 
   column_spec(1, width="60pt")  %>% save_kable("tables/TFR_complete.tex")
 
 ```
@@ -1306,7 +1309,7 @@ modelsummary(
   models_i5m_fm, 
   fmt = 2,
   stars = T, 
-  title = "Female and Male Child Mortality before 5",
+  title = "Female and Male Child Mortality before 5 \\label{tab:i5m_fm}",
   coef_rename = coef_map,
   statistic = stat_map,
   coef_omit = "Intercept",
@@ -1315,8 +1318,9 @@ modelsummary(
   format = "latex",
   conf_level = .95,
   gof_omit = "se_type") %>% 
-  kable_styling(full_width = T) %>% 
+  kable_styling(full_width = F) %>% 
   add_header_above(c(" " = 1, "Female Child Mortality before 5" = 4, "Male Child Mortality before 5" = 4)) %>%
+  footnote("All models include country and year fixed effects. Standard errors clustered by country, and 95% confidence intervals are presented in square brackets.") %>% 
   column_spec(1, width="60pt") %>% save_kable("tables/I5M_fm.tex")
 ```
 
@@ -1367,7 +1371,7 @@ modelsummary(
   models_i5m_fm_diff, 
   fmt = 2,
   stars = T, 
-  title = "Male minus Female Child Mortality before 5",
+  title = "Male minus Female Child Mortality before 5 \\label{tab:i5m_diff}",
   coef_rename = coef_map,
   statistic = stat_map,
   coef_omit = "Intercept",
@@ -1377,6 +1381,7 @@ modelsummary(
   conf_level = .95,
   gof_omit = "se_type") %>% 
   kable_styling(full_width = T) %>% 
+  footnote("All models include country and year fixed effects. Standard errors clustered by country, and 95% confidence intervals are presented in square brackets.") %>% 
   column_spec(1, width="60pt")  %>% save_kable("tables/I5M_fm_diff.tex")
 ```
 
@@ -1392,7 +1397,7 @@ modelsummary(
   stars = T, 
   coef_rename = coef_map,
   statistic = stat_map,
-  title = " Full Diff in Diff and IV regressions (with country weights exlcuding China and India)",
+  title = " Full Diff in Diff and IV regressions (with country weights exlcuding China and India) \\label{tab:all}",
   coef_omit = "Intercept",
   gof_map = gm_map,
   escape = FALSE,
@@ -1400,6 +1405,7 @@ modelsummary(
   conf_level = .95,
   gof_omit = "se_type") %>% 
   kable_styling(full_width = T) %>% 
+  footnote("All models include country and year fixed effects. Standard errors clustered by country, and 95% confidence intervals are presented in square brackets.") %>% 
   column_spec(1, width="60pt") %>% save_kable("tables/All.tex")
 ```
 
