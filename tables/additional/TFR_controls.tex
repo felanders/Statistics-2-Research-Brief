@@ -4,23 +4,21 @@
 \centering
 \begin{tabu} to \linewidth {>{\raggedright\arraybackslash}p{60pt}>{\centering}X>{\centering}X>{\centering}X>{\centering}X>{\centering}X}
 \toprule
-  & Base & Gender Policy & Health Expenditure & Health Expenditure & Primary Education & Full\\
+  & ln(TFR) & ln(TFR)  Gender Policy & ln(TFR) Health Expenditure & ln(TFR) Prim. Educ. & ln(TFR) Full\\
 \midrule
-ln(GDP per Capita) & -0.089** & 0.014 & -0.005 & 0.016 & 0.065\\
- & [-0.175, -0.003] & [-0.033, 0.061] & [-0.058, 0.047] & [-0.072, 0.104] & [-0.080, 0.209]\\
-Lagged Quota (2Y) & -0.131** & -0.032 & -0.117*** & -0.164*** & -0.163***\\
- & [-0.244, -0.018] & [-0.095, 0.031] & [-0.173, -0.060] & [-0.211, -0.118] & [-0.207, -0.119]\\
-Gender Policy in Place &  & 0.001 &  &  & \\
- &  & [-0.053, 0.055] &  &  & \\
-Health Exp. % of GDP &  &  & 0.006 & -0.006 & \\
- &  &  & [-0.010, 0.022] & [-0.025, 0.013] & \\
-Completed Prim. Educ. &  &  &  & -0.001 & -0.001\\
- &  &  &  & [-0.005, 0.003] & [-0.005, 0.003]\\
-ln(Absolute Health Exp. Per Capita) &  &  &  &  & -0.044\\
- &  &  &  &  & [-0.140, 0.052]\\
-N & 5270 & 606 & 2340 & 1377 & 1377\\
-R2 & 0.94 & 0.99 & 0.98 & 0.98 & 0.98\\
-R2 Adj. & 0.94 & 0.99 & 0.98 & 0.98 & 0.98\\
+ln(GDP per Capita) & -0.089** & 0.014 & -0.005 & -0.039 & 0.017\\
+ & [-0.175, -0.003] & [-0.033, 0.061] & [-0.058, 0.047] & [-0.110, 0.032] & [-0.025, 0.060]\\
+Lagged Quota (2Y) & -0.131** & -0.032 & -0.117*** & -0.258*** & -0.070***\\
+ & [-0.244, -0.018] & [-0.095, 0.031] & [-0.173, -0.060] & [-0.371, -0.145] & [-0.103, -0.037]\\
+Gender Policy in Place &  & 0.001 &  &  & -0.009\\
+ &  & [-0.053, 0.055] &  &  & [-0.051, 0.033]\\
+Health Exp. perc. of GDP &  &  & 0.006 &  & -0.004\\
+ &  &  & [-0.010, 0.022] &  & [-0.016, 0.008]\\
+Completed Prim. Educ. &  &  &  & -0.007* & -0.001\\
+ &  &  &  & [-0.014, 0.000] & [-0.004, 0.003]\\
+N & 5270 & 606 & 2340 & 2480 & 266\\
+R2 & 0.94 & 0.99 & 0.98 & 0.95 & 1.00\\
+R2 Adj. & 0.94 & 0.99 & 0.98 & 0.95 & 1.00\\
 \bottomrule
 \multicolumn{6}{l}{\textsuperscript{} * p < 0.1, ** p < 0.05, *** p < 0.01}\\
 \end{tabu}
