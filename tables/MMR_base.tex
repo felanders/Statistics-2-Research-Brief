@@ -2,7 +2,7 @@
 \tablefont
 \caption{Reproducing Results of \citep{bhalotra_maternal_2018}  \label{tab:reprod}}
 \centering
-\begin{tabu} to \linewidth {>{\raggedright\arraybackslash}p{60pt}>{\centering}X>{\centering}X>{\centering}X>{\centering}X>{\centering}X>{\centering}X>{\centering}X>{\centering}X>{\centering}X}
+\begin{tabular}[t]{>{\raggedright\arraybackslash}p{60pt}ccccccccc}
 \toprule
 \multicolumn{1}{c}{ } & \multicolumn{3}{c}{\% of Women in Parliament} & \multicolumn{3}{c}{Maternal Mortality Ratio} & \multicolumn{3}{c}{ln(Maternal Mortality Ratio)} \\
 \cmidrule(l{3pt}r{3pt}){2-4} \cmidrule(l{3pt}r{3pt}){5-7} \cmidrule(l{3pt}r{3pt}){8-10}
@@ -16,10 +16,13 @@ Lagged Quota (2Y) &  &  &  & -82.93** & -93.14** & -71.27*** & -0.10** & -0.10* 
  &  &  &  & [-153.74, -12.12] & [-167.07, -19.22] & [-111.79, -30.74] & [-0.19, 0.00] & [-0.20, 0.00] & [-0.23, -0.06]\\
 Exclude CN + IN &  & * & * &  & * & * &  & * & *\\
 Population Weights &  &  & * &  &  & * &  &  & *\\
+\midrule
 N & 2792 & 2755 & 2755 & 2400 & 2370 & 2370 & 2400 & 2370 & 2370\\
 R2 & 0.83 & 0.83 & 0.85 & 0.97 & 0.97 & 0.98 & 1.00 & 1.00 & 0.99\\
 R2 Adj. & 0.82 & 0.82 & 0.84 & 0.96 & 0.96 & 0.97 & 1.00 & 1.00 & 0.99\\
 \bottomrule
+\multicolumn{10}{l}{\rule{0pt}{1em}\textit{Note: }}\\
+\multicolumn{10}{l}{\rule{0pt}{1em}Note: All models include country and year fixed effects. Standard errors clustered by country, and 95\% confidence intervals are presented in square brackets.}\\
 \multicolumn{10}{l}{\textsuperscript{} * p < 0.1, ** p < 0.05, *** p < 0.01}\\
-\end{tabu}
+\end{tabular}
 \end{table}
