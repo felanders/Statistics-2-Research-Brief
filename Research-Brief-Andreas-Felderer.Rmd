@@ -300,7 +300,7 @@ coef_map = c("log(gdp_pc)"="ln(GDP per Capita)",
              "EDU_PRIM_F_WDI" = "Female Prim. Educ.", 
              "EDU_PRIM_M_WDI" = "Male Prim. Educ.", 
              "HEA_EXP" = "Health Exp. perc. of GDP",
-             "cpia_gender" = "Gender Policy in Place",
+             "cpia_gender" = "Gender Equality",
              "log(gdp_pc * HEA_EXP)" = "ln(Absolute Health Exp. per Capita)")
 
 gm_map <- list(
