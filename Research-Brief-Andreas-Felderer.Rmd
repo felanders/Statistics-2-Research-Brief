@@ -466,7 +466,13 @@ models_mmr_cont[["Placebo: ln(GDP)"]] <- lm_robust(
   fixed_effects = year + dhscc3,
   se_type = "CR0") 
 
-models_control[["ln(MMR)"]] <- models_mmr_cont[["ln(MMR) Full"]]
+models_control[["ln(MMR)"]] <- lm_robust(
+  log(MMR_WDI) ~  log(gdp_pc) + lag(quota, 2) +  HEA_EXP + EDU_PRIM_WDI,
+  clusters = dhscc3,
+  data = df_w, 
+  weights = pop,
+  fixed_effects = year + dhscc3,
+  se_type = "CR0")
 
 modelsummary(
   models_mmr_cont, 
@@ -970,7 +976,13 @@ models_tfr_cont[["ln(TFR) Full"]] <- lm_robust(
   fixed_effects = year + dhscc3,
   se_type = "CR0")
 
-models_control[["ln(TFR)"]] <- models_tfr_cont[["ln(TFR) Full"]]
+models_control[["ln(TFR)"]] <- lm_robust(
+  log(TFR_WDI) ~  log(gdp_pc) + lag(quota, 2) + HEA_EXP + EDU_PRIM_WDI,
+  clusters = dhscc3,
+  data = df_w, 
+  weights = pop,
+  fixed_effects = year + dhscc3,
+  se_type = "CR0")
 
 modelsummary(
   models_tfr_cont, 
@@ -1173,7 +1185,14 @@ models_i5m_cont[["ln(I5M) no CPIA Gender"]] <- lm_robust(
   fixed_effects = year + dhscc3,
   se_type = "CR0")
 
-models_control[["ln(I5M)"]] <- models_i5m_cont[["ln(I5M) Full"]]
+models_control[["ln(I5M)"]] <- lm_robust(
+  log(I5M_WDI) ~  log(gdp_pc) + lag(quota, 2)  + EDU_PRIM_WDI + HEA_EXP,
+  clusters = dhscc3,
+  data = df_w, 
+  weights = pop,
+  fixed_effects = year + dhscc3,
+  se_type = "CR0")
+
 
 modelsummary(
   models_i5m_cont, 
